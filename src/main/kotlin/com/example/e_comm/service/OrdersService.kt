@@ -45,8 +45,8 @@ class OrdersService(val ordersRepository: OrdersRepository) {
     }
 
     // Cancel Order
-    fun cancelOrder(oId: Long) {
+    fun cancelOrder(oId: Long): Mono<Void> {
         log.info("Your order with order id: {}, has been cancelled.", oId)
-        ordersRepository.deleteById(oId)
+        return ordersRepository.deleteById(oId)
     }
 }

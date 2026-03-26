@@ -46,7 +46,7 @@ class OrdersController(val orderService: OrdersService) {
 
     // delete controller - cancel order
     @DeleteMapping("/{oId}")
-    fun cancelOrder(@PathVariable("oId") oId: Long): Unit {
-        orderService.cancelOrder(oId)
+    fun cancelOrder(@PathVariable("oId") oId: Long): Mono<Void> {
+        return orderService.cancelOrder(oId)
     }
 }
