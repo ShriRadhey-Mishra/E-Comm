@@ -1,6 +1,7 @@
 package com.example.e_comm.service
 
 import com.example.e_comm.entity.Orders
+import com.example.e_comm.events.OrderEvent
 import com.example.e_comm.repository.OrdersRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -8,13 +9,23 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
-class OrdersService(val ordersRepository: OrdersRepository) {
+class OrdersService(val ordersRepository: OrdersRepository, val orderEventProducer: OrderEventProducer) {
     private val log = LoggerFactory.getLogger(OrdersService::class.java)
 
     // Place Order
     fun placeOrder(orders: Orders): Mono<Orders> {
-        log.info("Order has been placed.")
         return ordersRepository.save(orders)
+            .doOnSuccess { savedOrder ->
+                val event = OrderEvent(
+                    eventId = java.util.UUID.randomUUID().toString(),
+                    eventType = "ORDER_CREATED",
+                    order = savedOrder
+                )
+                orderEventProducer.sendEvent(savedOrder?.orderId.toString(), event)
+
+                log.info("Order has been placed.")
+            }
+
     }
 
     // Get Order by OrderId
